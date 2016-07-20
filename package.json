@@ -1,6 +1,6 @@
 {
   "name": "chai-http",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Extend Chai Assertion library with tests for http apis",
   "author": "Jake Luer <jake@alogicalparadox.com>",
   "keywords": [
@@ -46,22 +46,22 @@
     "querystring": "qs"
   },
   "dependencies": {
-    "cookiejar": "2.0.x",
+    "cookiejar": "2.1.0",
     "is-ip": "1.0.0",
-    "methods": "0.0.x",
-    "qs": "2.0.x",
-    "superagent": "1.8.0-beta.2"
+    "methods": "^1.1.2",
+    "qs": "^6.2.0",
+    "superagent": "^2.0.0"
   },
   "devDependencies": {
     "simplifyify": "^2.0.1",
     "chai": "*",
-    "coveralls": "^2.11.6",
-    "dox": "*",
-    "es6-shim": "*",
-    "http-server": "*",
-    "istanbul": "^0.4.2",
-    "mocha": "*",
-    "npm-run-all": "^1.5.1"
+    "coveralls": "^2.11.9",
+    "dox": "^0.8.1",
+    "es6-shim": "^0.35.1",
+    "http-server": "^0.9.0",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.5.3",
+    "npm-run-all": "^2.1.1"
   },
   "engines": {
     "node": ">= 0.6.0"

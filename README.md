@@ -44,7 +44,7 @@ To do this, you must first
 construct a request to an application or url.
 
 Upon construction you are provided a chainable api that
-allow to you specify the http VERB request (get, post, etc)
+allows you to specify the http VERB request (get, post, etc)
 that you wish to invoke.
 
 #### Application / Server
@@ -80,7 +80,7 @@ json, or even file attachments added to it, all with a simple API:
 chai.request(app)
   .put('/user/me')
   .set('X-API-Key', 'foobar')
-  .send({ passsword: '123', confirmPassword: '123' })
+  .send({ password: '123', confirmPassword: '123' })
 ```
 
 ```js
@@ -120,12 +120,45 @@ To make the request and assert on its response, the `end` method can be used:
 ```js
 chai.request(app)
   .put('/user/me')
-  .send({ passsword: '123', confirmPassword: '123' })
+  .send({ password: '123', confirmPassword: '123' })
   .end(function (err, res) {
      expect(err).to.be.null;
      expect(res).to.have.status(200);
   });
 ```
+##### Caveat
+Because the `end` function is passed a callback, assertions are run
+asynchronously. Therefore, a mechanism must be used to notify the testing
+framework that the callback has completed. Otherwise, the test will pass before
+the assertions are checked.
+
+For example, in the [Mocha test framework](http://mochajs.org/), this is
+accomplished using the
+[`done` callback](https://mochajs.org/#asynchronous-code), which signal that the
+callback has completed, and the assertions can be verified:
+
+```js
+it('fails, as expected', function(done) { // <= Pass in done callback
+  chai.request('http://localhost:8080')
+  .get('/')
+  .end(function(err, res) {
+    expect(res).to.have.status(123);
+    done();                               // <= Call done to signal callback end
+  });
+}) ;
+
+it('succeeds silently!', function() {   // <= No done callback
+  chai.request('http://localhost:8080')
+  .get('/')
+  .end(function(err, res) {
+    expect(res).to.have.status(123);    // <= Test completes before this runs
+  });
+}) ;
+```
+
+When `done` is passed in, Mocha will wait until the call to `done()`, or until
+the [timeout](http://mochajs.org/#timeouts) expires. `done` also accepts an
+error parameter when signaling completion.
 
 #### Dealing with the response - Promises
 
@@ -135,7 +168,7 @@ and chaining of `then`s becomes possible:
 ```js
 chai.request(app)
   .put('/user/me')
-  .send({ passsword: '123', confirmPassword: '123' })
+  .send({ password: '123', confirmPassword: '123' })
   .then(function (res) {
      expect(res).to.have.status(200);
   })
@@ -145,20 +178,22 @@ chai.request(app)
 ```
 
 __Note:__ Node.js version 0.10.x and some older web browsers do not have
-native promise support. You can use any promise library, such as
-[es6-promise](https://github.com/jakearchibald/es6-promise) or
-[kriskowal/q](https://github.com/kriskowal/q) and call the `addPromise`
-method to use that library with Chai HTTP. For example:
+native promise support. You can use any spec compliant library, such as:
+ - [kriskowal/q](https://github.com/kriskowal/q)
+ - [stefanpenner/es6-promise](https://github.com/stefanpenner/es6-promise)
+ - [petkaantonov/bluebird](https://github.com/petkaantonov/bluebird)
+ - [then/promise](https://github.com/then/promise)
+You will need to set the library you use to `global.Promise`, before
+requiring in chai-http. For example:
 
 ```js
+// Add promise support if this does not exist natively.
+if (!global.Promise) {
+  global.Promise = require('q');
+}
 var chai = require('chai');
 chai.use(require('chai-http'));
 
-// Add promise support if this does not exist natively.
-if (!global.Promise) {
-  var q = require('q');
-  chai.request.addPromises(q.Promise);
-}
 ```
 
 #### Retaining cookies with each request
@@ -181,44 +216,6 @@ agent
          expect(res).to.have.status(200);
       })
   })
-```
-
-### .then (resolveCb, rejectCb)
-
-* **@param** _{Function}_ resolveCB 
-* **@cb** {Response}
-* **@param** _{Function}_ rejectCB 
-* **@cb** {Error}
-
-Invoke the request to to the server. The response
-will be passed as a parameter to the resolveCb,
-while any errors will be passed to rejectCb.
-
-```js
-chai.request(app)
-  .get('/')
-  .then(function (res) {
-    expect(res).to.have.status(200);
-  }, function (err) {
-     throw err;
-  });
-```
-
-### .catch (rejectCb)
-
-* **@param** _{Function}_ rejectCB 
-* **@cb** {Error}
-
-Invoke the request to to the server, catching any
-errors with this callback. Behaves the same as
-Promises.
-
-```js
-chai.request(app)
-  .get('/')
-  .catch(function (err) {
-    throw err;
-  });
 ```
 
 ## Assertions
